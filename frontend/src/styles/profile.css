@@ -1,0 +1,181 @@
+/* Tầng giao diện Profile: cover và form chạy theo normal flow. */
+.profile-page {
+  width: min(680px, calc(100% - 32px));
+  margin: 28px auto 40px;
+  padding-bottom: 1px;
+}
+
+.profile-cover {
+  display: grid;
+  align-items: center;
+  min-width: 0;
+  padding: 30px;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(125deg, var(--cover-start), var(--cover-end));
+}
+
+.profile-identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 112px;
+  height: 112px;
+  aspect-ratio: 1;
+  padding: 5px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--avatar-ring);
+  box-shadow: var(--shadow);
+}
+
+.profile-avatar img,
+.profile-avatar .avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-identity-copy {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.profile-identity h1 {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-identity p {
+  margin: 7px 0 0;
+  color: var(--cover-text);
+}
+
+.profile-form-card {
+  margin-top: 24px;
+  padding: 26px;
+  border-radius: 18px;
+}
+
+.profile-form-card label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--label-text);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.profile-form-card .section-heading {
+  min-width: 0;
+  margin-bottom: 8px;
+}
+
+.profile-form-card .section-heading > div {
+  min-width: 0;
+}
+
+.profile-form-card .section-heading p {
+  margin: 5px 0 0;
+}
+
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.avatar-upload-row > .avatar {
+  flex: 0 0 auto;
+  width: 82px;
+  height: 82px;
+  aspect-ratio: 1;
+}
+
+.avatar-upload-controls {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.avatar-upload-controls small {
+  max-width: 100%;
+  color: var(--muted);
+  font-size: .78rem;
+  overflow-wrap: anywhere;
+}
+
+.profile-form-card > .primary {
+  margin-top: 5px;
+}
+
+@media (max-width: 700px) {
+  .profile-page {
+    width: calc(100% - 20px);
+    margin: 18px auto 32px;
+  }
+
+  .profile-cover {
+    padding: 24px 20px;
+  }
+
+  .profile-identity {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+  }
+
+  .profile-identity h1 {
+    font-size: 1.35rem;
+  }
+
+  .profile-form-card {
+    margin-top: 18px;
+    padding: 20px;
+  }
+
+  .avatar-upload-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .avatar-upload-controls {
+    justify-items: center;
+    width: 100%;
+  }
+
+  .avatar-upload-controls .upload-button {
+    justify-content: center;
+    width: 100%;
+  }
+}

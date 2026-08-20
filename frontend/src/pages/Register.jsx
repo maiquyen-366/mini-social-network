@@ -1,0 +1,10 @@
+// Tầng page: màn hình đăng ký.
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+
+export default function Register() {
+  const { signUp } = useAuth(); const navigate = useNavigate(); const [form, setForm] = useState({ username: "", email: "", password: "", password_confirm: "" }); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
+  const submit = async (event) => { event.preventDefault(); setError(""); setLoading(true); try { await signUp(form); navigate("/"); } catch (err) { setError(err.response?.data?.message || "Đăng ký thất bại"); } finally { setLoading(false); } };
+  return <main className="auth-page"><div className="auth-brand"><span className="brand-mark">M</span><span>Mini Social</span><p>Tạo hồ sơ và bắt đầu chia sẻ câu chuyện của bạn.</p></div><form className="card form auth-form" onSubmit={submit}><span className="eyebrow">BẮT ĐẦU NGAY</span><h1>Tạo tài khoản</h1><p className="form-subtitle">Chỉ mất vài giây để tham gia cộng đồng.</p>{error && <p className="form-error">{error}</p>}<label>Username<input required autoComplete="username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></label><label>Email <span className="optional">(không bắt buộc)</span><input type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label><label>Mật khẩu<input required minLength="6" autoComplete="new-password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></label><label>Nhập lại mật khẩu<input required minLength="6" autoComplete="new-password" type="password" value={form.password_confirm} onChange={(e) => setForm({ ...form, password_confirm: e.target.value })} /></label><button className="primary full-button" disabled={loading}>{loading ? "Đang tạo tài khoản..." : "Đăng ký"}</button><p className="auth-switch">Đã có tài khoản? <Link to="/login">Đăng nhập</Link></p></form></main>;
+}

@@ -1,0 +1,1 @@
+"""Migration của app posts."""

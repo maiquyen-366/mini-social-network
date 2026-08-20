@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mini Social">
+  <defs>
+    <linearGradient id="mini-social-blue" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5B7CFA" />
+      <stop offset="1" stop-color="#2948B8" />
+    </linearGradient>
+  </defs>
+  <path d="M20 4h24c8.84 0 16 7.16 16 16v19c0 8.84-7.16 16-16 16H28L15 62l3-8.2C9.95 52.84 4 46 4 38V20C4 11.16 11.16 4 20 4Z" fill="url(#mini-social-blue)" />
+  <path d="M18 42V20l14 14 14-14v22" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

@@ -1,0 +1,434 @@
+/* Tầng theme: biến màu sáng/tối, navbar, emoji picker và trạng thái dùng chung. */
+:root {
+  --background: #f5f7fb;
+  --surface: #ffffff;
+  --surface-soft: #f7f8fc;
+  --surface-raised: #ffffff;
+  --text-primary: #17233f;
+  --text-secondary: #718096;
+  --label-text: #3c4b68;
+  --border: #e7ebf3;
+  --border-strong: #c9d3eb;
+  --input-border: #d8deea;
+  --primary: #3156d8;
+  --primary-hover: #2442ac;
+  --primary-soft: #edf2ff;
+  --primary-soft-hover: #e0e8ff;
+  --danger: #c24155;
+  --danger-soft: #fff0f2;
+  --success: #16845b;
+  --shadow: 0 14px 40px rgba(38, 58, 112, .07);
+  --focus-ring: rgba(49, 86, 216, .14);
+  --navbar-background: rgba(255, 255, 255, .94);
+  --message-other: #f0f3f9;
+  --message-mine: #3156d8;
+  --disabled-background: #9aa8cf;
+  --disabled-text: #f5f7ff;
+  --cover-start: #314fae;
+  --cover-end: #6685e9;
+  --cover-text: #dbe4ff;
+  --avatar-ring: #ffffff;
+  --chat-hover: #f6f8ff;
+  --chat-active-border: #cfdbff;
+  --blue: var(--primary);
+  --blue-dark: var(--primary-hover);
+  --blue-soft: var(--primary-soft);
+  --ink: var(--text-primary);
+  --muted: var(--text-secondary);
+  --line: var(--border);
+}
+
+[data-theme="dark"] {
+  --background: #101827;
+  --surface: #182235;
+  --surface-soft: #202c42;
+  --surface-raised: #1d2940;
+  --text-primary: #edf2ff;
+  --text-secondary: #aab7ce;
+  --label-text: #cbd5e8;
+  --border: #2d3a52;
+  --border-strong: #42516d;
+  --input-border: #3a4965;
+  --primary: #7695ff;
+  --primary-hover: #91a9ff;
+  --primary-soft: #233254;
+  --primary-soft-hover: #2b3d64;
+  --danger: #ff8da0;
+  --danger-soft: #3a2330;
+  --success: #58d6a2;
+  --shadow: 0 16px 42px rgba(2, 8, 23, .3);
+  --focus-ring: rgba(118, 149, 255, .22);
+  --navbar-background: rgba(24, 34, 53, .94);
+  --message-other: #253149;
+  --message-mine: #496be0;
+  --disabled-background: #46536d;
+  --disabled-text: #aeb9ce;
+  --cover-start: #283e8c;
+  --cover-end: #4d68c6;
+  --cover-text: #d9e2ff;
+  --avatar-ring: #edf2ff;
+  --chat-hover: #202d46;
+  --chat-active-border: #40578d;
+}
+
+html[data-theme] {
+  min-height: 100%;
+  color: var(--text-primary);
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--text-primary);
+  background: var(--background);
+  transition: color .2s ease, background-color .2s ease;
+}
+
+input,
+textarea {
+  border-color: var(--input-border);
+  color: var(--text-primary);
+  background: var(--surface);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.card {
+  color: var(--text-primary);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.form label,
+.comment p {
+  color: var(--label-text);
+}
+
+.navbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 24px;
+  height: 72px;
+  padding: 0 max(18px, calc((100% - 1180px) / 2));
+  color: var(--text-primary);
+  background: var(--navbar-background);
+  border-color: var(--border);
+  box-shadow: 0 6px 24px rgba(25, 40, 78, .05);
+}
+
+[data-theme="dark"] .navbar {
+  box-shadow: 0 8px 28px rgba(2, 8, 23, .24);
+}
+
+.brand,
+.brand:hover {
+  color: var(--text-primary);
+}
+
+.brand-text {
+  white-space: nowrap;
+}
+
+.app-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.nav-links {
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nav-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: .9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background-color .18s;
+}
+
+.nav-item:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.nav-item.active {
+  color: var(--primary);
+  border-color: var(--chat-active-border);
+  background: var(--primary-soft);
+}
+
+.nav-item:focus-visible,
+.brand:focus-visible,
+.chat-tool-button:focus-visible,
+.emoji-option:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.nav-profile {
+  max-width: 190px;
+  color: var(--text-primary);
+}
+
+.profile-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-action {
+  cursor: pointer;
+}
+
+.nav-logout {
+  color: var(--danger);
+}
+
+.nav-logout:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.ui-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+}
+
+.form-error {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.success {
+  color: var(--success);
+}
+
+.auth-page {
+  background: radial-gradient(circle at 15% 10%, var(--primary-soft) 0, transparent 34%), var(--background);
+}
+
+.auth-brand,
+.auth-form,
+.post-card,
+.comments-card,
+.profile-mini {
+  color: var(--text-primary);
+}
+
+.composer textarea,
+.chat-input textarea {
+  color: var(--text-primary);
+  background: var(--surface-soft);
+}
+
+.composer textarea:focus,
+.chat-input textarea:focus {
+  border-color: var(--input-border);
+  background: var(--surface);
+}
+
+.tip-card,
+.upload-button,
+.load-more {
+  border-color: var(--chat-active-border);
+  background: var(--primary-soft);
+}
+
+.upload-button:hover,
+.load-more:hover {
+  background: var(--primary-soft-hover);
+}
+
+.image-preview {
+  background: var(--surface-soft);
+}
+
+.remove-image {
+  background: rgba(23, 35, 63, .78);
+}
+
+.emoji-picker {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.chat-tool-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--input-border);
+  border-radius: 11px;
+  color: var(--text-secondary);
+  background: var(--surface-soft);
+  transition: color .18s, border-color .18s, background-color .18s;
+}
+
+.chat-tool-button:hover:not(:disabled),
+.chat-tool-button.active {
+  color: var(--primary);
+  border-color: var(--chat-active-border);
+  background: var(--primary-soft);
+}
+
+.chat-tool-button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.emoji-picker-panel {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 8;
+  width: min(320px, calc(100vw - 44px));
+  max-height: min(330px, 48vh);
+  padding: 13px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow);
+}
+
+.composer-tools {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.emoji-group + .emoji-group {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.emoji-group > strong {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--text-secondary);
+  font-size: .72rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.emoji-option {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 2px;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.emoji-option:hover {
+  background: var(--primary-soft);
+}
+
+.page-loading,
+.empty-inline,
+.empty-state,
+.chat-empty {
+  color: var(--text-secondary);
+}
+
+.page-loading {
+  margin: 40px auto;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .navbar {
+    gap: 10px;
+    height: 62px;
+    padding: 0 12px;
+  }
+
+  .nav-links {
+    gap: 3px;
+  }
+
+  .nav-item {
+    width: 42px;
+    padding: 8px;
+  }
+
+  .nav-label,
+  .profile-label {
+    display: none;
+  }
+
+  .nav-profile {
+    width: 42px;
+  }
+}
+
+@media (max-width: 700px) {
+  .composer-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .composer-tools .upload-button {
+    width: 100%;
+  }
+
+  .composer-emoji-picker .emoji-picker-panel {
+    right: 0;
+    left: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-text {
+    display: none;
+  }
+
+  .navbar {
+    gap: 8px;
+    padding: 0 10px;
+  }
+}
