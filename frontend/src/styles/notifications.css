@@ -1,0 +1,208 @@
+/* Tầng giao diện: nút kết bạn và bảng thông báo trên navbar. */
+.friend-action-wrap {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.friend-action {
+  padding: 6px 10px;
+  border: 1px solid var(--chat-active-border);
+  border-radius: 999px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  font-size: .75rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.friend-action:hover:not(:disabled) {
+  color: #fff;
+  background: var(--blue);
+}
+
+.friend-action-friends,
+.friend-action-request_sent {
+  color: var(--muted);
+  border-color: var(--line);
+  background: var(--surface-soft);
+}
+
+.friend-action-error {
+  max-width: 170px;
+  color: var(--danger);
+  font-size: .68rem;
+  text-align: right;
+}
+
+.notification-menu {
+  position: relative;
+}
+
+.notification-trigger {
+  position: relative;
+}
+
+.notification-badge {
+  display: inline-grid;
+  place-items: center;
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border: 2px solid var(--navbar-background);
+  border-radius: 999px;
+  color: #fff;
+  background: var(--danger);
+  font-size: .58rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 30;
+  width: min(390px, calc(100vw - 24px));
+  max-height: min(560px, calc(100dvh - 88px));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.notification-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.notification-panel > header > div {
+  display: grid;
+  gap: 2px;
+}
+
+.notification-panel > header strong {
+  font-size: 1rem;
+}
+
+.notification-panel > header small,
+.notification-item time {
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.notification-panel > header button {
+  padding: 6px;
+  color: var(--blue);
+  background: transparent;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.notification-list {
+  max-height: 470px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.notification-item {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.notification-item:last-child {
+  border-bottom: 0;
+}
+
+.notification-item.unread {
+  background: var(--blue-soft);
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.notification-content > span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 0 42px;
+}
+
+.notification-actions button {
+  padding: 7px 11px;
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.notification-actions .primary {
+  color: #fff;
+  background: var(--blue);
+}
+
+.notification-error {
+  margin: 10px 12px 0;
+  color: var(--danger);
+  font-size: .8rem;
+}
+
+@media (max-width: 700px) {
+  .notification-panel {
+    position: fixed;
+    top: 66px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    max-height: calc(100dvh - 76px);
+  }
+
+  .friend-action {
+    padding: 6px 8px;
+    font-size: .7rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-item,
+  .nav-profile {
+    width: 36px;
+    min-width: 36px;
+    min-height: 38px;
+    padding: 6px;
+  }
+
+  .nav-links {
+    gap: 1px;
+  }
+
+  .ui-icon {
+    width: 18px;
+    height: 18px;
+  }
+}

@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../hooks/useTheme";
 import Avatar from "./Avatar";
 import Logo from "./Logo";
+import NotificationMenu from "./NotificationMenu";
 import { ChatIcon, HomeIcon, LogoutIcon, MoonIcon, SunIcon } from "./icons/NavIcons";
 
 function navClass({ isActive }) {
@@ -31,6 +32,7 @@ export default function Navbar() {
           <ChatIcon />
           <span className="nav-label">Chat</span>
         </NavLink>
+        <NotificationMenu />
         <button
           type="button"
           className="nav-item nav-action"

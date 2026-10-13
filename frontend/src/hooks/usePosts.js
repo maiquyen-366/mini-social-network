@@ -12,7 +12,12 @@ export const usePosts = () => {
     setPagination(result.pagination);
     setPage(pageNumber);
   }, []);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    const reloadFriendshipStates = () => load();
+    window.addEventListener("friendships.changed", reloadFriendshipStates);
+    return () => window.removeEventListener("friendships.changed", reloadFriendshipStates);
+  }, [load]);
   const addPost = async (payload) => { await createPost(payload); await load(); };
   const removePost = async (id) => { await deletePost(id); setPosts((items) => items.filter((item) => item.id !== id)); };
   const likePost = async (id) => {

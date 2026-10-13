@@ -24,8 +24,10 @@ class ConversationRepository(BaseRepository):
             ),
         )
 
-    def list_for_user(self, user_id):
+    def list_for_user(self, user_id, friend_ids=None):
         queryset = self.model.objects.filter(participants=user_id)
+        if friend_ids is not None:
+            queryset = queryset.filter(participants__id__in=friend_ids).distinct()
         return self._with_summary(queryset, user_id).order_by("-updated_at")
 
     def get_private_between(self, first_user_id, second_user_id):

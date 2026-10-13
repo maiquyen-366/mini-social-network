@@ -53,41 +53,6 @@
   font-weight: 800;
 }
 
-.new-chat-form {
-  display: grid;
-  flex: 0 0 auto;
-  gap: 10px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-.new-chat-form label {
-  color: var(--label-text);
-  font-size: .9rem;
-  font-weight: 700;
-}
-
-.new-chat-controls {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 12px;
-  min-width: 0;
-}
-
-.new-chat-controls input,
-.new-chat-controls .primary {
-  min-width: 0;
-  min-height: 44px;
-}
-
-.new-chat-controls .primary {
-  min-width: 72px;
-  padding: 10px 16px;
-  white-space: nowrap;
-}
-
-.new-chat-controls .primary:disabled,
 .chat-input .primary:disabled {
   color: var(--disabled-text);
   background: var(--disabled-background);
@@ -111,6 +76,66 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+}
+
+.friend-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 14px 8px 6px;
+  border-top: 1px solid var(--line);
+  color: var(--label-text);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.friend-list-heading small {
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.friend-chat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+}
+
+.friend-chat-item:hover:not(:disabled) {
+  border-color: var(--border);
+  background: var(--chat-hover);
+}
+
+.friend-chat-item > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.friend-chat-item strong,
+.friend-chat-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-chat-item small {
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.friend-empty {
+  padding-top: 12px;
 }
 
 .conversation {
@@ -397,15 +422,6 @@
   .chat-layout:not(.room-open) .chat-sidebar,
   .chat-layout.room-open .chat-room {
     display: flex;
-  }
-
-  .new-chat-controls {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .new-chat-controls .primary {
-    width: 100%;
   }
 
   .back-button {

@@ -6,6 +6,7 @@ import { SendIcon } from "../components/icons/NavIcons";
 import { useAuth } from "../hooks/useAuth";
 import { useChat } from "../hooks/useChat";
 import { createConversation } from "../services/chatService";
+import { listFriends } from "../services/friendService";
 
 function otherParticipant(conversation, userId) {
   return conversation?.participants?.find((participant) => participant.id !== userId)
@@ -34,26 +35,35 @@ export default function Chat() {
     deactivateRoom,
     sendMessage,
   } = useChat();
-  const [username, setUsername] = useState("");
+  const [friends, setFriends] = useState([]);
+  const [openingFriendId, setOpeningFriendId] = useState(null);
   const [content, setContent] = useState("");
   const [error, setError] = useState("");
   const [roomOpen, setRoomOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
 
-  const start = async (event) => {
-    event.preventDefault();
-    if (!username.trim()) return;
+  const startChatWithFriend = async (friend) => {
+    const existingConversation = conversations.find((conversation) => (
+      conversation.participants?.some((participant) => participant.id === friend.id)
+    ));
+    if (existingConversation) {
+      openConversation(existingConversation);
+      setRoomOpen(true);
+      return;
+    }
 
+    setOpeningFriendId(friend.id);
     try {
-      const conversation = await createConversation(username);
+      const conversation = await createConversation(friend.username);
       upsertConversation(conversation);
       openConversation(conversation);
       setRoomOpen(true);
-      setUsername("");
       setError("");
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Không thể mở cuộc trò chuyện.");
+    } finally {
+      setOpeningFriendId(null);
     }
   };
 
@@ -93,7 +103,30 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    let activeEffect = true;
+    const loadFriends = () => {
+      listFriends()
+        .then((items) => {
+          if (activeEffect) setFriends(items);
+        })
+        .catch(() => {
+          if (activeEffect) setError("Không thể tải danh sách bạn bè.");
+        });
+    };
+
+    loadFriends();
+    window.addEventListener("friendships.changed", loadFriends);
+    return () => {
+      activeEffect = false;
+      window.removeEventListener("friendships.changed", loadFriends);
+    };
+  }, []);
+
   const activeOther = otherParticipant(active, user?.id);
+  const friendsWithoutConversation = friends.filter((friend) => !conversations.some((conversation) => (
+    conversation.participants?.some((participant) => participant.id === friend.id)
+  )));
 
   return (
     <main className={`chat-layout ${roomOpen ? "room-open" : ""}`}>
@@ -105,25 +138,6 @@ export default function Chat() {
           </div>
           <span className="count-badge">{conversations.length}</span>
         </div>
-
-        <form className="new-chat-form" onSubmit={start}>
-          <label htmlFor="chat-username">Bắt đầu cuộc trò chuyện</label>
-          <div className="new-chat-controls">
-            <input
-              id="chat-username"
-              placeholder="Nhập username..."
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-            />
-            <button
-              className="primary"
-              disabled={!username.trim()}
-              aria-label="Mở cuộc trò chuyện"
-            >
-              Mở
-            </button>
-          </div>
-        </form>
 
         {error && <p className="form-error">{error}</p>}
 
@@ -164,6 +178,27 @@ export default function Chat() {
               </button>
             );
           }) : <div className="empty-inline">Chưa có cuộc trò chuyện nào.</div>}
+
+          <div className="friend-list-heading">
+            <span>Bạn bè</span>
+            <small>{friends.length}</small>
+          </div>
+          {friendsWithoutConversation.map((friend) => (
+            <button
+              type="button"
+              className="friend-chat-item"
+              key={friend.id}
+              disabled={openingFriendId === friend.id}
+              onClick={() => startChatWithFriend(friend)}
+            >
+              <Avatar username={friend.username} url={friend.avatar_url} size="medium" />
+              <span>
+                <strong>{friend.username}</strong>
+                <small>{openingFriendId === friend.id ? "Đang mở..." : "Nhắn tin"}</small>
+              </span>
+            </button>
+          ))}
+          {!friends.length && <div className="empty-inline friend-empty">Hãy kết bạn từ Newsfeed để bắt đầu chat.</div>}
         </div>
       </aside>
 

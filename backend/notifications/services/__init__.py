@@ -1,0 +1,5 @@
+"""Tầng service notifications: export NotificationService."""
+
+from notifications.services.notification_service import NotificationService
+
+__all__ = ["NotificationService"]

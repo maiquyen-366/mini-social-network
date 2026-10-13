@@ -1,18 +1,26 @@
 """Tầng Service: nghiệp vụ tạo phòng, kiểm tra quyền và lưu/lấy tin nhắn."""
 
-from accounts.repositories import UserRepository
+from accounts.repositories import FriendshipRepository, UserRepository
 from chat.repositories import ConversationRepository, MessageRepository
 from core.exceptions import BusinessValidationError, NotFoundError, PermissionError
 
 
 class ChatService:
-    def __init__(self, conversation_repository=None, message_repository=None, user_repository=None):
+    def __init__(
+        self,
+        conversation_repository=None,
+        message_repository=None,
+        user_repository=None,
+        friendship_repository=None,
+    ):
         self.conversations = conversation_repository or ConversationRepository()
         self.messages = message_repository or MessageRepository()
         self.users = user_repository or UserRepository()
+        self.friendships = friendship_repository or FriendshipRepository()
 
     def list_conversations(self, user_id):
-        return self.conversations.list_for_user(user_id)
+        friend_ids = self.friendships.get_friend_ids(user_id)
+        return self.conversations.list_for_user(user_id, friend_ids)
 
     def get_or_create_conversation(self, user_id, other_username):
         other_user = self.users.get_by_username(other_username)
@@ -20,6 +28,8 @@ class ChatService:
             raise NotFoundError("Không tìm thấy người dùng muốn chat.")
         if other_user.id == user_id:
             raise BusinessValidationError("Không thể tạo cuộc trò chuyện với chính mình.")
+        if not self.friendships.are_friends(user_id, other_user.id):
+            raise PermissionError("Chỉ bạn bè mới có thể nhắn tin cho nhau.")
         conversation = self.conversations.get_private_between(user_id, other_user.id)
         if conversation:
             return self.get_conversation_summary(conversation.id, user_id)
@@ -33,6 +43,16 @@ class ChatService:
             raise NotFoundError("Không tìm thấy cuộc trò chuyện.")
         if not self.conversations.is_participant(conversation_id, user_id):
             raise PermissionError("Bạn không thuộc cuộc trò chuyện này.")
+        other_user_ids = [
+            participant_id
+            for participant_id in self.conversations.get_participant_ids(conversation_id)
+            if participant_id != user_id
+        ]
+        if not other_user_ids or not all(
+            self.friendships.are_friends(user_id, participant_id)
+            for participant_id in other_user_ids
+        ):
+            raise PermissionError("Chỉ bạn bè mới có thể nhắn tin cho nhau.")
         return conversation
 
     def list_messages(self, conversation_id, user_id):

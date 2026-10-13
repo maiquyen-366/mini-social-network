@@ -12,10 +12,15 @@ class PostSerializer(serializers.ModelSerializer):
     likes_count = serializers.IntegerField(read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
     is_liked = serializers.BooleanField(read_only=True)
+    friendship_state = serializers.SerializerMethodField()
+    friend_request_id = serializers.IntegerField(source="friendship_request_id", read_only=True, allow_null=True)
 
     class Meta:
         model = Post
-        fields = ["id", "author", "author_username", "author_avatar_url", "content", "image_url", "likes_count", "comments_count", "is_liked", "created_at"]
+        fields = [
+            "id", "author", "author_username", "author_avatar_url", "content", "image_url",
+            "likes_count", "comments_count", "is_liked", "friendship_state", "friend_request_id", "created_at",
+        ]
         read_only_fields = ["id", "author", "created_at"]
 
     def get_author_avatar_url(self, obj):
@@ -27,6 +32,19 @@ class PostSerializer(serializers.ModelSerializer):
         url = obj.image_url or ""
         request = self.context.get("request")
         return request.build_absolute_uri(url) if request and url.startswith("/") else url
+
+    def get_friendship_state(self, obj):
+        request = self.context.get("request")
+        user_id = request.user.id if request and request.user.is_authenticated else None
+        if user_id == obj.author_id:
+            return "self"
+        status = getattr(obj, "friendship_status", None)
+        if status == "accepted":
+            return "friends"
+        if status == "pending":
+            requester_id = getattr(obj, "friendship_requester_id", None)
+            return "request_sent" if requester_id == user_id else "request_received"
+        return "none"
 
 
 class PostCreateSerializer(serializers.Serializer):

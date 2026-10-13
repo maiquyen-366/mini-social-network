@@ -18,6 +18,7 @@ backend/
   accounts/            # User, auth, profile
   posts/               # Post, Comment, Like
   chat/                # Conversation, Message, REST + WebSocket
+  notifications/       # Notification, REST + WebSocket
 frontend/
   .env.example        # URL API, WebSocket và backend origin
   vercel.json         # rewrite cho React Router SPA
@@ -25,7 +26,7 @@ frontend/
     config/            # đọc và chuẩn hóa biến môi trường Vite
     api/               # axios request
     services/          # API, upload validation, media URL và logic gọi API
-    hooks/             # useAuth, usePosts, useChat
+    hooks/             # useAuth, usePosts, useChat, useNotifications
     context/           # AuthContext
     components/        # Navbar, Avatar, PostCard, PostForm
     pages/              # Login, Register, Feed, PostDetail, Profile, Chat
@@ -60,15 +61,14 @@ Copy-Item .env.example .env
 Mở `backend/.env`, cấu hình `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`. Khi chạy local giữ `DB_SSLMODE=disable`, rồi chạy:
 
 ```powershell
-python manage.py makemigrations accounts posts chat
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver 8000
 ```
 
-Project đã kèm migration `0001_initial.py`, migration local `0002_*` và migration Cloudinary `0003_*`; không sửa/xóa migration cũ. Có thể kiểm tra không còn migration thiếu bằng `python manage.py makemigrations --check --dry-run`.
+Project đã kèm đầy đủ migration, gồm model Friendship/Notification và migration dữ liệu giữ quan hệ chat cũ; không sửa/xóa migration cũ. Có thể kiểm tra không còn migration thiếu bằng `python manage.py makemigrations --check --dry-run`.
 
-`runserver` của Django hỗ trợ ASGI khi có Daphne trong `INSTALLED_APPS`. Chat dùng room socket `ws://localhost:8000/ws/chat/<conversation_id>/?token=<access_token>` và sidebar socket `ws://localhost:8000/ws/chat/sidebar/?token=<access_token>`.
+`runserver` của Django hỗ trợ ASGI khi có Daphne trong `INSTALLED_APPS`. Chat dùng room socket `ws://localhost:8000/ws/chat/<conversation_id>/?token=<access_token>`, sidebar socket `ws://localhost:8000/ws/chat/sidebar/?token=<access_token>` và thông báo dùng `ws://localhost:8000/ws/notifications/?token=<access_token>`.
 
 Cloudinary được cấu hình bằng ba biến `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. Mỗi ảnh phải là JPEG, PNG, WEBP hoặc GIF và không lớn hơn 5 MB. `avatar_url`/`image_url` tiếp tục là tên field API, còn `avatar_public_id`/`image_public_id` dùng để xóa ảnh cũ.
 
@@ -125,6 +125,10 @@ Tất cả endpoint dưới đây trừ auth công khai cần header `Authorizat
 | POST | `/api/accounts/logout/` | Logout phía client, trả success |
 | GET | `/api/accounts/me/` | Xem profile của mình |
 | PATCH | `/api/accounts/me/` | Cập nhật email/avatar_file/bio bằng `multipart/form-data` |
+| GET | `/api/accounts/friends/` | Danh sách bạn bè được phép chat |
+| POST | `/api/accounts/friend-requests/` | Gửi lời mời với `{ "user_id": 2 }` |
+| POST | `/api/accounts/friend-requests/<id>/accept/` | Chấp nhận lời mời kết bạn |
+| DELETE | `/api/accounts/friend-requests/<id>/` | Từ chối hoặc hủy lời mời đang chờ |
 | GET | `/api/posts/` | Newsfeed mới nhất trước, phân trang `?page=1` |
 | POST | `/api/posts/` | Tạo bài text + image_file bằng `multipart/form-data` |
 | GET | `/api/posts/<id>/` | Xem chi tiết bài |
@@ -133,17 +137,21 @@ Tất cả endpoint dưới đây trừ auth công khai cần header `Authorizat
 | GET | `/api/posts/<id>/comments/` | Danh sách comment |
 | POST | `/api/posts/<id>/comments/` | Tạo comment |
 | GET | `/api/chat/conversations/` | Danh sách cuộc trò chuyện của mình |
-| POST | `/api/chat/conversations/` | Tạo/mở chat với `{ "username": "..." }` |
+| POST | `/api/chat/conversations/` | Tạo/mở chat với một username đã là bạn bè |
 | GET | `/api/chat/conversations/<id>/messages/` | Load lịch sử tin nhắn |
+| GET | `/api/notifications/` | Danh sách thông báo và tổng chưa đọc |
+| POST | `/api/notifications/<id>/read/` | Đánh dấu một thông báo đã đọc |
+| POST | `/api/notifications/read-all/` | Đánh dấu tất cả đã đọc |
 
 WebSocket:
 
 ```text
 ws://localhost:8000/ws/chat/<conversation_id>/?token=<access_token>
 ws://localhost:8000/ws/chat/sidebar/?token=<access_token>
+ws://localhost:8000/ws/notifications/?token=<access_token>
 ```
 
-Gửi JSON `{ "content": "Xin chào" }` vào room socket. Server trả các event `message.created` và `messages.read`; sidebar socket nhận `conversation.updated`. `read_at` được lưu trong PostgreSQL nên trạng thái “Đã gửi/Đã xem” không mất khi reload.
+Gửi JSON `{ "content": "Xin chào" }` vào room socket. Server trả các event `message.created` và `messages.read`; sidebar socket nhận `conversation.updated`; socket thông báo phát `notifications.changed` để frontend tải lại badge/danh sách. `read_at` được lưu trong PostgreSQL nên trạng thái “Đã gửi/Đã xem” không mất khi reload. Backend kiểm tra quan hệ bạn bè ở service cho cả REST lẫn WebSocket.
 
 Khi upload, frontend gửi `multipart/form-data` với `avatar_file` cho profile hoặc `image_file` cho bài viết. Không tự đặt header `Content-Type`, để axios tự tạo boundary cho FormData.
 
@@ -167,11 +175,12 @@ Controller chỉ lấy `request`, chạy serializer, gọi service và tạo `Re
 ## 7. Tự review trước khi chạy
 
 - Đã có custom User kế thừa `AbstractUser`, `AUTH_USER_MODEL`, JWT login/refresh và token interceptor phía React.
-- Các model User, Post, Comment, Like, Conversation và Message đã có migration khởi tạo và đăng ký trong Django Admin.
+- Các model User, Friendship, Post, Comment, Like, Conversation, Message và Notification đã có migration và đăng ký trong Django Admin.
 - Upload avatar/ảnh bài viết dùng CloudinaryStorage, preview phía React, validate MIME/extension/size ở cả frontend và backend, và tự dọn file cũ an toàn.
 - CORS/CSRF/hosts được đọc từ biến môi trường, mặc định chỉ cho local và không bật allow-all.
-- Quyền xóa bài kiểm tra ở service; chat kiểm tra participant ở service; profile chỉ thao tác trên `request.user`.
-- Các app có migration khởi tạo, migration local cũ, migration Cloudinary và migration chat read receipt; lệnh `makemigrations --check --dry-run` hiện không phát hiện thay đổi thiếu.
+- Quyền xóa bài kiểm tra ở service; chat kiểm tra participant và quan hệ bạn bè ở service; profile chỉ thao tác trên `request.user`.
+- Like, comment, gửi/chấp nhận kết bạn tạo thông báo; bỏ like xóa thông báo like tương ứng.
+- Các app có đầy đủ migration, gồm friendship, notification, Cloudinary và chat read receipt; lệnh `makemigrations --check --dry-run` hiện không phát hiện thay đổi thiếu.
 - Backend không dùng Redis/Celery/Docker; Channels cấu hình `InMemoryChannelLayer`.
 - Cần giữ backend và frontend chạy đồng thời. `InMemoryChannelLayer` không chia sẻ tin nhắn giữa nhiều process/instance, nên không tăng số instance hoặc worker backend.
 
@@ -262,7 +271,7 @@ Nếu không có Render Shell, có thể chạy `manage.py createsuperuser` từ
 Sau khi deploy, kiểm tra:
 
 - `https://<backend>.onrender.com/admin/` tải đủ CSS.
-- API đăng nhập và feed trả response bình thường.
+- API đăng nhập, feed, kết bạn và thông báo trả response bình thường.
 - Render service chỉ có một instance để `InMemoryChannelLayer` hoạt động nhất quán.
 
 ### 9.4. Deploy frontend lên Vercel
@@ -295,10 +304,12 @@ Sau khi Vercel cấp domain thật, quay lại Render cập nhật `CORS_ALLOWED
 1. Đăng ký/đăng nhập, refresh trang và xác nhận token refresh gọi đúng backend production.
 2. Tạo bài có chữ/emoji/ảnh, mở Feed và Post Detail, kiểm tra ảnh Cloudinary.
 3. Cập nhật avatar và bio.
-4. Mở hai tài khoản ở hai cửa sổ, vào cùng hội thoại và gửi tin nhắn realtime qua `wss://`.
-5. Reload trực tiếp các route React để xác nhận rewrite SPA.
-6. Mở Django Admin và kiểm tra CSS static.
-7. Xem console/network của trình duyệt, bảo đảm không còn request tới localhost, lỗi CORS hoặc mixed content.
+4. Tài khoản A gửi lời mời từ bài viết; tài khoản B nhận badge realtime, chấp nhận và kiểm tra cả hai thấy nhau trong Chat.
+5. Like/comment bài của tài khoản khác và kiểm tra thông báo realtime.
+6. Mở hai tài khoản ở hai cửa sổ, vào cùng hội thoại và gửi tin nhắn realtime qua `wss://`.
+7. Reload trực tiếp các route React để xác nhận rewrite SPA.
+8. Mở Django Admin và kiểm tra CSS static.
+9. Xem console/network của trình duyệt, bảo đảm không còn request tới localhost, lỗi CORS hoặc mixed content.
 
 Trước mỗi lần push quan trọng có thể chạy lại:
 

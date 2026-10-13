@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Avatar from "./Avatar";
+import FriendButton from "./FriendButton";
 
 export default function PostCard({ post, currentUser, onLike, onDelete }) {
   const [imageFailed, setImageFailed] = useState(false);
@@ -15,6 +16,11 @@ export default function PostCard({ post, currentUser, onLike, onDelete }) {
           <strong>{post.author_username}</strong>
           <small>{new Date(post.created_at).toLocaleString("vi-VN")}</small>
         </div>
+        <FriendButton
+          userId={post.author}
+          initialState={post.friendship_state}
+          requestId={post.friend_request_id}
+        />
       </div>
 
       <p className="post-content">{post.content}</p>
