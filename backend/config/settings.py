@@ -142,3 +142,27 @@ SIMPLE_JWT = {
 }
 
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
+REDIS_HOST = os.getenv("REDIS_HOST", "").strip()
+REDIS_PORT = os.getenv("REDIS_PORT", "6379").strip()
+REDIS_URL = os.getenv("REDIS_URL", "").strip()
+
+if REDIS_URL or REDIS_HOST:
+    try:
+        import channels_redis  # noqa: F401
+        redis_hosts = [REDIS_URL] if REDIS_URL else [(REDIS_HOST, int(REDIS_PORT))]
+        CHANNEL_LAYERS = {
+            "default": {
+                "BACKEND": "channels_redis.core.RedisChannelLayer",
+                "CONFIG": {"hosts": redis_hosts},
+            },
+        }
+        redis_cache_url = REDIS_URL or f"redis://{REDIS_HOST}:{REDIS_PORT}/1"
+        CACHES = {
+            "default": {
+                "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                "LOCATION": redis_cache_url,
+            }
+        }
+    except ImportError:
+        pass

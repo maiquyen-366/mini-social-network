@@ -4,7 +4,38 @@ Project bài tập mạng xã hội mini, chạy local hoặc triển khai front
 
 `urls → controller → serializer → service → repository → model`
 
-Không dùng Docker, Redis, Celery, microservice hay thư viện UI nặng. Realtime chat dùng `InMemoryChannelLayer`, vì vậy backend phải chạy đúng **một instance/một process** cả ở local lẫn Render.
+Hỗ trợ chạy trực tiếp (local) hoặc chạy qua **Docker & Redis**. Khi có cấu hình Redis (qua Docker hoặc biến môi trường `REDIS_HOST`/`REDIS_URL`), Django Channels sẽ dùng `channels_redis` phục vụ WebSocket chat và thông báo realtime cũng như cache; khi chạy local không có Redis, hệ thống tự động fallback an toàn về `InMemoryChannelLayer`.
+
+## 0. Chạy nhanh toàn bộ hệ thống bằng Docker & Redis (Khuyên dùng)
+
+Hệ thống đã được đóng gói đầy đủ trong `docker-compose.yml` gồm 4 dịch vụ:
+- **db**: PostgreSQL 16 (port host: `5433` để tránh trùng lặp nếu máy đã chạy PostgreSQL 5432)
+- **redis**: Redis 7 Alpine (port host: `6379`)
+- **backend**: Django ASGI / Daphne (port host: `8000`), tự động đợi DB & Redis sẵn sàng và chạy migration
+- **frontend**: React Vite Dev Server (port host: `5173`) hỗ trợ hot-reload khi chỉnh sửa code
+
+### Lệnh khởi chạy:
+
+```powershell
+# Khởi động toàn bộ các service ở chế độ nền
+docker compose up -d --build
+
+# Xem log các service
+docker compose logs -f
+
+# Tạo tài khoản quản trị (superuser) trong container backend
+docker compose exec backend python manage.py createsuperuser
+
+# Dừng hệ thống
+docker compose down
+```
+
+Sau khi khởi chạy:
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API: [http://localhost:8000/api](http://localhost:8000/api)
+- Django Admin: [http://localhost:8000/admin](http://localhost:8000/admin)
+
+---
 
 ## 1. Cấu trúc chính
 
